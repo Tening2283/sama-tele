@@ -217,3 +217,8 @@ kbd {
   .knob.sound { font-size: 1.1rem; }
   .channel-display { width: auto; padding: 6px 10px; white-space: nowrap; }
 }
+
+/* Petit voyant sous le bouton son : MUET (rouge) ou SON (vert) */
+.sound-label { margin-top: -8px; font-family: 'Courier New', monospace; font-size: .7rem; font-weight: bold; color: #6f6; text-shadow: 0 0 4px #0f0; }
+.sound-label.off { color: #ff6b6b; text-shadow: 0 0 4px #f00; }
+@media (max-width: 600px) { .sound-label { margin: 0 0 0 -6px; } }

@@ -10,7 +10,7 @@ const FAIL_MESSAGES = {
 }
 
 // La télé : affiche la bande-annonce (YouTube officiel) ou l'affiche du film.
-export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, loading, error, channel, typed, muted, onToggleMute, onNext, onPrev }) {
+export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, loading, error, channel, typed, muted, onToggleMute, onMutedChange, onNext, onPrev }) {
   let screen
   if (loading) {
     screen = <Static />
@@ -19,7 +19,7 @@ export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, lo
   } else if (!movie) {
     screen = <div className="screen-msg">Choisis un pays pour allumer la télé 📺</div>
   } else if (trailerKeys.length && !trailerError) {
-    screen = <YouTubePlayer videoKeys={trailerKeys} muted={muted} onFail={onTrailerFail} />
+    screen = <YouTubePlayer videoKeys={trailerKeys} muted={muted} onFail={onTrailerFail} onMutedChange={onMutedChange} />
   } else {
     const bg = movie.backdrop_path || movie.poster_path
     const reason = trailerError || 'unavailable'
@@ -74,6 +74,9 @@ export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, lo
           >
             {muted ? '🔇' : '🔊'}
           </button>
+          <span className={`sound-label${muted ? ' off' : ''}`} aria-hidden="true">
+            {muted ? 'MUET' : 'SON'}
+          </span>
           <div className="speaker" aria-hidden="true" />
         </div>
       </div>

@@ -222,6 +222,7 @@ export default function App() {
         typed={typed}
         muted={muted}
         onToggleMute={() => setMuted((m) => !m)}
+        onMutedChange={setMuted}
         onNext={() => zap(1)}
         onPrev={() => zap(-1)}
       />
