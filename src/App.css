@@ -72,12 +72,14 @@ header p { margin: 0; color: var(--muted); }
   position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
   background: rgba(0, 0, 0, .7); padding: 6px 12px; border-radius: 6px; font-size: .85rem; white-space: nowrap;
 }
-.osd {
-  position: absolute; top: 14px; right: 24px; pointer-events: none;
-  font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.3rem; color: #6f6;
-  text-shadow: 0 0 6px #0f0; animation: fade 3s forwards;
+/* Afficheur lumineux du numéro de chaîne, sur le panneau (jamais sur la vidéo). */
+.channel-display {
+  width: 70px; padding: 6px 0; border-radius: 6px; text-align: center;
+  background: #0a140a; border: 2px solid #1d1209; box-shadow: inset 0 0 8px #000;
+  font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem;
+  color: #6f6; text-shadow: 0 0 6px #0f0;
 }
-@keyframes fade { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+.channel-display.off { color: #254025; text-shadow: none; }
 
 .panel { width: 90px; display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 8px; }
 .brand { font-size: .6rem; font-weight: bold; letter-spacing: 1px; color: var(--accent); text-align: center; }

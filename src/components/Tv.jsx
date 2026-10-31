@@ -41,11 +41,13 @@ export default function Tv({ movie, trailerKey, loading, error, channel, onNext,
           <div className="screen">
             {screen}
             <div className="scanlines" aria-hidden="true" />
-            {movie && !loading && <div className="osd">CH {String(channel).padStart(2, '0')}</div>}
           </div>
         </div>
         <div className="panel">
           <div className="brand">TÉLÉ MONDE</div>
+          <div className={`channel-display${movie ? '' : ' off'}`} aria-label="Numéro de chaîne">
+            CH {movie ? String(channel).padStart(2, '0') : '--'}
+          </div>
           <button className="knob" onClick={onPrev} disabled={loading} title="Chaîne précédente" aria-label="Chaîne précédente">
             ◀
           </button>
