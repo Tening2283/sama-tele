@@ -6,7 +6,7 @@ import WorldMap from './components/WorldMap.jsx'
 import useFavorites from './useFavorites.js'
 import useRemote from './useRemote.js'
 import { COUNTRIES, DECADES, WATCH_REGIONS } from './countries.js'
-import { discoverMovies, getGenres, getProviders, getTrailers, hasKey } from './tmdb.js'
+import { discoverMovies, getGenres, getProviders, getTrailers } from './tmdb.js'
 import './App.css'
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -32,7 +32,7 @@ export default function App() {
   const [trailerError, setTrailerError] = useState('')
   const [providers, setProviders] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(hasKey ? '' : 'Ajoute ta clé TMDB dans le fichier .env')
+  const [error, setError] = useState('')
   const [mode, setMode] = useState('country') // 'country' = films du pays, 'favorites' = mes favoris
   const [reloadKey, setReloadKey] = useState(0) // +1 pour relancer la recherche du pays
   const { favorites, isFavorite, toggleFavorite } = useFavorites()
@@ -63,12 +63,12 @@ export default function App() {
 
   // Au démarrage : on charge la liste des genres une seule fois.
   useEffect(() => {
-    if (hasKey) getGenres().then(setGenres).catch(() => {})
+    getGenres().then(setGenres).catch(() => {})
   }, [])
 
   // Dès que le pays, le genre ou l'époque change → nouvelle liste de films.
   useEffect(() => {
-    if (!country || !hasKey) return
+    if (!country) return
     setMode('country')
     const id = ++requestId.current
     setLoading(true)
@@ -159,7 +159,7 @@ export default function App() {
             Pays du film
             {country && <img className="flag" src={`https://flagcdn.com/w40/${country.toLowerCase()}.png`} alt="" />}
           </span>
-          <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!hasKey}>
+          <select value={country} onChange={(e) => setCountry(e.target.value)}>
             <option value="">— Choisir —</option>
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>

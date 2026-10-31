@@ -1,22 +1,15 @@
-// Petit client pour l'API TMDB (v3).
-// La clé est lue depuis le fichier .env (VITE_TMDB_API_KEY).
+// Petit client pour l'API TMDB.
+// Le navigateur n'appelle pas TMDB directement : il passe par notre serveur (/api/tmdb),
+// qui ajoute la clé secrète. Voir server/tmdbProxy.js.
 
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY
-const BASE = 'https://api.themoviedb.org/3'
-export const IMG = 'https://image.tmdb.org/t/p'
-
-export const hasKey = Boolean(API_KEY && API_KEY !== 'ta_cle_ici')
+export const IMG = 'https://image.tmdb.org/t/p' // les images n'ont pas besoin de clé
 
 async function get(path, params = {}) {
-  const url = new URL(BASE + path)
-  url.searchParams.set('api_key', API_KEY)
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
-  const res = await fetch(url)
-  if (!res.ok) {
-    if (res.status === 401) throw new Error('Clé TMDB invalide (vérifie ton fichier .env).')
-    throw new Error(`Erreur TMDB ${res.status}`)
-  }
-  return res.json()
+  const query = new URLSearchParams({ path, ...params })
+  const res = await fetch(`/api/tmdb?${query}`)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error ?? `Erreur TMDB ${res.status}`)
+  return data
 }
 
 // Liste des genres de films (Action, Comédie, Drame…) avec leur identifiant TMDB.
