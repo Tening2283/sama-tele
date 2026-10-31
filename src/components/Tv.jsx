@@ -1,8 +1,16 @@
 import Static from './Static.jsx'
+import YouTubePlayer from './YouTubePlayer.jsx'
 import { IMG } from '../tmdb.js'
 
+const FAIL_MESSAGES = {
+  unavailable: 'Pas de bande-annonce disponible',
+  refused: 'YouTube ne permet pas de lire cette bande-annonce ici',
+  timeout: 'La vidéo ne se charge pas (connexion lente ou bloqueur de pub ?)',
+  blocked: 'YouTube est bloqué (bloqueur de pub ?)',
+}
+
 // La télé : affiche la bande-annonce (YouTube officiel) ou l'affiche du film.
-export default function Tv({ movie, trailerKey, loading, error, channel, onNext, onPrev }) {
+export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, loading, error, channel, onNext, onPrev }) {
   let screen
   if (loading) {
     screen = <Static />
@@ -10,22 +18,25 @@ export default function Tv({ movie, trailerKey, loading, error, channel, onNext,
     screen = <div className="screen-msg">{error}</div>
   } else if (!movie) {
     screen = <div className="screen-msg">Choisis un pays pour allumer la télé 📺</div>
-  } else if (trailerKey) {
-    screen = (
-      <iframe
-        key={trailerKey}
-        src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&rel=0&modestbranding=1`}
-        title={`Bande-annonce : ${movie.title}`}
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowFullScreen
-      />
-    )
+  } else if (trailerKeys.length && !trailerError) {
+    screen = <YouTubePlayer videoKeys={trailerKeys} onFail={onTrailerFail} />
   } else {
     const bg = movie.backdrop_path || movie.poster_path
+    const reason = trailerError || 'unavailable'
     screen = (
       <div className="screen-poster">
         {bg && <img src={`${IMG}/w780${bg}`} alt={movie.title} />}
-        <span className="no-trailer">Pas de bande-annonce disponible</span>
+        <span className="no-trailer">
+          {FAIL_MESSAGES[reason]}
+          {trailerKeys[0] && (
+            <>
+              {' · '}
+              <a href={`https://www.youtube.com/watch?v=${trailerKeys[0]}`} target="_blank" rel="noreferrer">
+                Voir sur YouTube
+              </a>
+            </>
+          )}
+        </span>
       </div>
     )
   }

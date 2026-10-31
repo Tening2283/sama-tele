@@ -45,8 +45,9 @@ export async function discoverByCountry(countryCode) {
   return data.results
 }
 
-// Bande-annonce officielle sur YouTube (fr en priorité, sinon anglais / sans langue).
-export async function getTrailer(movieId) {
+// Bandes-annonces YouTube, de la meilleure à la moins bonne
+// (officielle, en français si possible). Le lecteur essaie la suivante si une vidéo ne marche pas.
+export async function getTrailers(movieId) {
   const data = await get(`/movie/${movieId}/videos`, {
     language: 'fr-FR',
     include_video_language: 'fr,en,null',
@@ -57,7 +58,7 @@ export async function getTrailer(movieId) {
     (v.official ? 2 : 0) +
     (v.iso_639_1 === 'fr' ? 1 : 0)
   yt.sort((a, b) => score(b) - score(a))
-  return yt[0]?.key ?? null
+  return yt.slice(0, 5).map((v) => v.key)
 }
 
 // Où regarder le film légalement (données JustWatch via TMDB).

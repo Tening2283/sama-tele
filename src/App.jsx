@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Tv from './components/Tv.jsx'
 import MovieInfo from './components/MovieInfo.jsx'
 import { COUNTRIES, WATCH_REGIONS } from './countries.js'
-import { discoverByCountry, getProviders, getTrailer, hasKey } from './tmdb.js'
+import { discoverByCountry, getProviders, getTrailers, hasKey } from './tmdb.js'
 import './App.css'
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -21,7 +21,8 @@ export default function App() {
   const [region, setRegion] = useState('FR')
   const [movies, setMovies] = useState([])
   const [index, setIndex] = useState(0)
-  const [trailerKey, setTrailerKey] = useState(null)
+  const [trailerKeys, setTrailerKeys] = useState([])
+  const [trailerError, setTrailerError] = useState('')
   const [providers, setProviders] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(hasKey ? '' : 'Ajoute ta clé TMDB dans le fichier .env')
@@ -36,10 +37,11 @@ export default function App() {
     setLoading(true)
     setError('')
     try {
-      const [key] = await Promise.all([getTrailer(list[i].id), wait(600)]) // 600 ms de neige
+      const [keys] = await Promise.all([getTrailers(list[i].id), wait(600)]) // 600 ms de neige
       if (id !== requestId.current) return
       setIndex(i)
-      setTrailerKey(key)
+      setTrailerKeys(keys)
+      setTrailerError('')
     } catch (e) {
       if (id === requestId.current) setError(e.message)
     } finally {
@@ -72,6 +74,9 @@ export default function App() {
     }
   }
 
+  // Stable (useCallback) pour ne pas recréer le lecteur YouTube à chaque rendu.
+  const onTrailerFail = useCallback((reason) => setTrailerError(reason), [])
+
   const zap = (step) => {
     if (!movies.length) return
     tune(movies, (index + step + movies.length) % movies.length)
@@ -99,12 +104,15 @@ export default function App() {
 
       <div className="controls">
         <label>
-          Pays du film
+          <span className="label-row">
+            Pays du film
+            {country && <img className="flag" src={`https://flagcdn.com/w40/${country.toLowerCase()}.png`} alt="" />}
+          </span>
           <select value={country} onChange={(e) => chooseCountry(e.target.value)} disabled={!hasKey}>
             <option value="">— Choisir —</option>
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
-                {c.flag} {c.name}
+                {c.name}
               </option>
             ))}
           </select>
@@ -123,7 +131,9 @@ export default function App() {
 
       <Tv
         movie={movie}
-        trailerKey={trailerKey}
+        trailerKeys={trailerKeys}
+        trailerError={trailerError}
+        onTrailerFail={onTrailerFail}
         loading={loading}
         error={error}
         channel={index + 1}

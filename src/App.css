@@ -130,3 +130,12 @@ footer .tmdb {
   .controls select { min-width: 0; width: 100%; }
   .controls label { flex: 1 1 100%; }
 }
+
+/* Drapeau du pays choisi (image : les emojis drapeaux ne s'affichent pas sous Windows) */
+.label-row { display: flex; align-items: center; gap: 8px; min-height: 18px; }
+.flag { width: 24px; height: auto; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .2); }
+
+/* Lecteur YouTube créé par l'API */
+.yt-host { position: absolute; inset: 0; }
+.no-trailer a { color: var(--accent); }
+.no-trailer { max-width: 90%; white-space: normal; text-align: center; }
