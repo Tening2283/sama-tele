@@ -19,28 +19,43 @@ async function get(path, params = {}) {
   return res.json()
 }
 
-// Liste de films produits dans un pays donné (code ISO, ex: "SN", "FR").
-export async function discoverByCountry(countryCode) {
-  const base = {
-    with_origin_country: countryCode,
+// Liste des genres de films (Action, Comédie, Drame…) avec leur identifiant TMDB.
+export async function getGenres() {
+  const data = await get('/genre/movie/list', { language: 'fr-FR' })
+  return data.genres // [{ id: 28, name: 'Action' }, ...]
+}
+
+// Films d'un pays (code ISO, ex: "SN"), avec filtres optionnels :
+//   genre  : identifiant TMDB du genre (ex: 35 pour Comédie)
+//   decade : première année de la décennie (ex: 1970 pour les années 70)
+export async function discoverMovies({ country, genre, decade }) {
+  const params = {
+    with_origin_country: country,
     language: 'fr-FR',
     sort_by: 'popularity.desc',
     include_adult: 'false',
   }
-  // D'abord des films assez connus ; sinon on élargit (petites cinématographies).
-  let data = await get('/discover/movie', { ...base, 'vote_count.gte': 30 })
-  if (data.results.length === 0) {
-    data = await get('/discover/movie', base)
+  if (genre) params.with_genres = genre
+  if (decade) {
+    params['primary_release_date.gte'] = `${decade}-01-01`
+    params['primary_release_date.lte'] = `${Number(decade) + 9}-12-31`
   }
-  // On pioche une page au hasard pour varier les films.
+
+  // D'abord des films assez connus ; s'il n'y en a pas, on enlève ce filtre
+  // (utile pour les pays qui ont peu de films sur TMDB).
+  let minVotes = 30
+  let data = await get('/discover/movie', { ...params, 'vote_count.gte': minVotes })
+  if (data.results.length === 0) {
+    minVotes = 0
+    data = await get('/discover/movie', { ...params, 'vote_count.gte': minVotes })
+  }
+
+  // On pioche une page au hasard (parmi les 5 premières) pour varier les films.
   const maxPage = Math.min(data.total_pages, 5)
-  if (maxPage > 1) {
-    const page = 1 + Math.floor(Math.random() * maxPage)
-    if (page !== 1) {
-      const params = data.results.length ? { ...base, 'vote_count.gte': 30 } : base
-      const other = await get('/discover/movie', { ...params, page })
-      if (other.results.length) data = other
-    }
+  const page = 1 + Math.floor(Math.random() * maxPage)
+  if (page > 1) {
+    const other = await get('/discover/movie', { ...params, 'vote_count.gte': minVotes, page })
+    if (other.results.length) data = other
   }
   return data.results
 }

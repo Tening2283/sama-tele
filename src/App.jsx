@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Tv from './components/Tv.jsx'
 import MovieInfo from './components/MovieInfo.jsx'
-import { COUNTRIES, WATCH_REGIONS } from './countries.js'
-import { discoverByCountry, getProviders, getTrailers, hasKey } from './tmdb.js'
+import { COUNTRIES, DECADES, WATCH_REGIONS } from './countries.js'
+import { discoverMovies, getGenres, getProviders, getTrailers, hasKey } from './tmdb.js'
 import './App.css'
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -18,6 +18,9 @@ function shuffle(list) {
 
 export default function App() {
   const [country, setCountry] = useState('')
+  const [genre, setGenre] = useState('') // '' = tous les genres
+  const [decade, setDecade] = useState('') // '' = toutes les époques
+  const [genres, setGenres] = useState([]) // liste chargée depuis TMDB
   const [region, setRegion] = useState('FR')
   const [movies, setMovies] = useState([])
   const [index, setIndex] = useState(0)
@@ -49,30 +52,35 @@ export default function App() {
     }
   }, [])
 
-  // Nouveau pays → nouvelle liste de films.
-  const chooseCountry = async (code) => {
-    setCountry(code)
-    if (!code || !hasKey) return
+  // Au démarrage : on charge la liste des genres une seule fois.
+  useEffect(() => {
+    if (hasKey) getGenres().then(setGenres).catch(() => {})
+  }, [])
+
+  // Dès que le pays, le genre ou l'époque change → nouvelle liste de films.
+  useEffect(() => {
+    if (!country || !hasKey) return
     const id = ++requestId.current
     setLoading(true)
     setError('')
-    try {
-      const list = shuffle(await discoverByCountry(code))
-      if (id !== requestId.current) return
-      setMovies(list)
-      if (list.length === 0) {
-        setError('Aucun film trouvé pour ce pays.')
-        setLoading(false)
-        return
-      }
-      tune(list, 0)
-    } catch (e) {
-      if (id === requestId.current) {
+    discoverMovies({ country, genre, decade })
+      .then((found) => {
+        if (id !== requestId.current) return
+        const list = shuffle(found)
+        setMovies(list)
+        if (list.length === 0) {
+          setError('Aucun film trouvé pour ces filtres.')
+          setLoading(false)
+        } else {
+          tune(list, 0)
+        }
+      })
+      .catch((e) => {
+        if (id !== requestId.current) return
         setError(e.message)
         setLoading(false)
-      }
-    }
-  }
+      })
+  }, [country, genre, decade, tune])
 
   // Stable (useCallback) pour ne pas recréer le lecteur YouTube à chaque rendu.
   const onTrailerFail = useCallback((reason) => setTrailerError(reason), [])
@@ -108,11 +116,33 @@ export default function App() {
             Pays du film
             {country && <img className="flag" src={`https://flagcdn.com/w40/${country.toLowerCase()}.png`} alt="" />}
           </span>
-          <select value={country} onChange={(e) => chooseCountry(e.target.value)} disabled={!hasKey}>
+          <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={!hasKey}>
             <option value="">— Choisir —</option>
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Genre
+          <select value={genre} onChange={(e) => setGenre(e.target.value)}>
+            <option value="">Tous les genres</option>
+            {genres.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Époque
+          <select value={decade} onChange={(e) => setDecade(e.target.value)}>
+            <option value="">Toutes les époques</option>
+            {DECADES.map((d) => (
+              <option key={d} value={d}>
+                Années {String(d).slice(2)}
               </option>
             ))}
           </select>

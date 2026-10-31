@@ -20,10 +20,11 @@ header { text-align: center; }
 header h1 { margin: 0 0 4px; font-size: 2.2rem; letter-spacing: 1px; }
 header p { margin: 0; color: var(--muted); }
 
-.controls { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin: 24px 0 32px; }
-.controls label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; color: var(--muted); }
+/* 4 menus : sur une ligne en grand écran, 2 par ligne ou 1 par ligne sur petit écran */
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin: 24px 0 32px; }
+.controls label { display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; font-size: .85rem; color: var(--muted); }
 .controls select {
-  font-size: 1rem; padding: 10px 12px; border-radius: 8px; min-width: 220px;
+  font-size: 1rem; padding: 10px 12px; border-radius: 8px; width: 100%;
   border: 1px solid #3c3352; background: #221b30; color: var(--text);
 }
 

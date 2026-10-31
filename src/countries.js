@@ -35,3 +35,6 @@ export const WATCH_REGIONS = [
   { code: 'CH', name: 'Suisse' },
   { code: 'US', name: 'États-Unis' },
 ]
+
+// Décennies proposées dans le filtre « Époque » (1950 → années 50, etc.).
+export const DECADES = [1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
