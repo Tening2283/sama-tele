@@ -194,3 +194,26 @@ footer .tmdb {
   border: 1px solid #3c3352; background: #221b30; color: var(--muted);
 }
 .world-map .zones button.on { background: var(--accent); border-color: var(--accent); color: #1b1426; font-weight: bold; }
+
+/* ---------- Télécommande ---------- */
+.knob.sound { font-size: 1.3rem; }
+.remote-help {
+  max-width: 720px; margin: 20px auto 0; padding: 10px 16px; border-radius: 10px;
+  background: #221b30; border: 1px solid #3c3352;
+}
+.remote-help summary { cursor: pointer; color: var(--accent); font-weight: bold; }
+.remote-help ul { margin: 12px 0 4px; padding-left: 20px; line-height: 2; }
+.remote-help p { margin: 4px 0; font-size: .85rem; }
+kbd {
+  display: inline-block; min-width: 1.6em; padding: 1px 6px; border-radius: 5px; text-align: center;
+  font-family: inherit; font-size: .85rem; background: #2f2742; border: 1px solid #4a3f63; border-bottom-width: 3px;
+}
+
+/* Petit écran : le panneau a 3 boutons + l'afficheur sur une seule ligne */
+@media (max-width: 600px) {
+  .panel { gap: 10px; }
+  .brand { display: none; }
+  .knob { width: 48px; height: 48px; flex-shrink: 0; font-size: 1rem; }
+  .knob.sound { font-size: 1.1rem; }
+  .channel-display { width: auto; padding: 6px 10px; white-space: nowrap; }
+}

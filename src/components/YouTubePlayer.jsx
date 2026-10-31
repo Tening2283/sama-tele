@@ -27,8 +27,11 @@ const LOAD_TIMEOUT = 10000 // 10 s sans réponse du lecteur → on abandonne
 
 // Lit la première vidéo qui fonctionne parmi `videoKeys`.
 // Appelle onFail('refused' | 'timeout' | 'blocked') si aucune ne marche.
-export default function YouTubePlayer({ videoKeys, onFail }) {
+export default function YouTubePlayer({ videoKeys, muted, onFail }) {
   const host = useRef(null)
+  const playerRef = useRef(null) // le lecteur, une fois prêt (pour couper/remettre le son)
+  const mutedRef = useRef(muted) // valeur à jour de « muted », lue à la création du lecteur
+  mutedRef.current = muted
 
   useEffect(() => {
     let player = null
@@ -50,10 +53,11 @@ export default function YouTubePlayer({ videoKeys, onFail }) {
         host.current.appendChild(el)
         player = new YT.Player(el, {
           videoId: videoKeys[0],
-          playerVars: { autoplay: 1, mute: 1, rel: 0, playsinline: 1 },
+          playerVars: { autoplay: 1, mute: mutedRef.current ? 1 : 0, rel: 0, playsinline: 1 },
           events: {
             onReady: (e) => {
               clearTimeout(timer)
+              playerRef.current = e.target
               e.target.playVideo()
             },
             // Vidéo supprimée, privée ou interdite en intégration → la suivante.
@@ -71,10 +75,19 @@ export default function YouTubePlayer({ videoKeys, onFail }) {
     return () => {
       done = true
       clearTimeout(timer)
+      playerRef.current = null
       player?.destroy?.()
       if (host.current) host.current.innerHTML = ''
     }
   }, [videoKeys, onFail])
+
+  // Bouton son / touche M : on agit sur le lecteur existant (sans le recréer).
+  useEffect(() => {
+    const player = playerRef.current
+    if (!player) return
+    if (muted) player.mute()
+    else player.unMute()
+  }, [muted])
 
   return <div ref={host} className="yt-host" />
 }

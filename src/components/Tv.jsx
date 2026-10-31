@@ -10,7 +10,7 @@ const FAIL_MESSAGES = {
 }
 
 // La télé : affiche la bande-annonce (YouTube officiel) ou l'affiche du film.
-export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, loading, error, channel, onNext, onPrev }) {
+export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, loading, error, channel, typed, muted, onToggleMute, onNext, onPrev }) {
   let screen
   if (loading) {
     screen = <Static />
@@ -19,7 +19,7 @@ export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, lo
   } else if (!movie) {
     screen = <div className="screen-msg">Choisis un pays pour allumer la télé 📺</div>
   } else if (trailerKeys.length && !trailerError) {
-    screen = <YouTubePlayer videoKeys={trailerKeys} onFail={onTrailerFail} />
+    screen = <YouTubePlayer videoKeys={trailerKeys} muted={muted} onFail={onTrailerFail} />
   } else {
     const bg = movie.backdrop_path || movie.poster_path
     const reason = trailerError || 'unavailable'
@@ -56,14 +56,23 @@ export default function Tv({ movie, trailerKeys, trailerError, onTrailerFail, lo
         </div>
         <div className="panel">
           <div className="brand">TÉLÉ MONDE</div>
-          <div className={`channel-display${movie ? '' : ' off'}`} aria-label="Numéro de chaîne">
-            CH {movie ? String(channel).padStart(2, '0') : '--'}
+          <div className={`channel-display${movie || typed ? '' : ' off'}`} aria-label="Numéro de chaîne" aria-live="polite">
+            {typed === 'ERR' ? 'ERR' : typed ? `CH ${typed.padEnd(2, '_')}` : `CH ${movie ? String(channel).padStart(2, '0') : '--'}`}
           </div>
-          <button className="knob" onClick={onPrev} disabled={loading} title="Chaîne précédente" aria-label="Chaîne précédente">
+          <button className="knob" onClick={onPrev} disabled={loading} title="Chaîne précédente (←)" aria-label="Chaîne précédente">
             ◀
           </button>
-          <button className="knob" onClick={onNext} disabled={loading} title="Chaîne suivante" aria-label="Chaîne suivante">
+          <button className="knob" onClick={onNext} disabled={loading} title="Chaîne suivante (→)" aria-label="Chaîne suivante">
             ▶
+          </button>
+          <button
+            className="knob sound"
+            onClick={onToggleMute}
+            aria-pressed={!muted}
+            title={muted ? 'Remettre le son (M)' : 'Couper le son (M)'}
+            aria-label={muted ? 'Remettre le son' : 'Couper le son'}
+          >
+            {muted ? '🔇' : '🔊'}
           </button>
           <div className="speaker" aria-hidden="true" />
         </div>

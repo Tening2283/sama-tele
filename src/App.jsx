@@ -4,6 +4,7 @@ import MovieInfo from './components/MovieInfo.jsx'
 import Favorites from './components/Favorites.jsx'
 import WorldMap from './components/WorldMap.jsx'
 import useFavorites from './useFavorites.js'
+import useRemote from './useRemote.js'
 import { COUNTRIES, DECADES, WATCH_REGIONS } from './countries.js'
 import { discoverMovies, getGenres, getProviders, getTrailers, hasKey } from './tmdb.js'
 import './App.css'
@@ -35,6 +36,8 @@ export default function App() {
   const [mode, setMode] = useState('country') // 'country' = films du pays, 'favorites' = mes favoris
   const [reloadKey, setReloadKey] = useState(0) // +1 pour relancer la recherche du pays
   const { favorites, isFavorite, toggleFavorite } = useFavorites()
+  const [muted, setMuted] = useState(true) // son coupé au départ (sinon les navigateurs bloquent la lecture auto)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   // Évite d'afficher le résultat d'une ancienne requête si on zappe vite.
   const requestId = useRef(0)
@@ -112,6 +115,21 @@ export default function App() {
     if (!movies.length) return
     tune(movies, (index + step + movies.length) % movies.length)
   }
+
+  // Télécommande au clavier (← → chiffres M F ?).
+  const typed = useRemote({
+    onNext: () => zap(1),
+    onPrev: () => zap(-1),
+    // Aller directement à une chaîne : renvoie false si elle n'existe pas (affiche « ERR »).
+    onChannel: (n) => {
+      if (n < 1 || n > movies.length) return false
+      tune(movies, n - 1)
+      return true
+    },
+    onFavorite: () => movie && !loading && toggleFavorite(movie),
+    onMute: () => setMuted((m) => !m),
+    onHelp: () => setHelpOpen((o) => !o),
+  })
 
   // Offres légales : rechargées quand le film ou le pays du spectateur change.
   useEffect(() => {
@@ -201,9 +219,24 @@ export default function App() {
         loading={loading}
         error={error}
         channel={index + 1}
+        typed={typed}
+        muted={muted}
+        onToggleMute={() => setMuted((m) => !m)}
         onNext={() => zap(1)}
         onPrev={() => zap(-1)}
       />
+
+      <details className="remote-help" open={helpOpen} onToggle={(e) => setHelpOpen(e.currentTarget.open)}>
+        <summary>⌨️ Télécommande clavier (touche ?)</summary>
+        <ul>
+          <li><kbd>←</kbd> <kbd>→</kbd> chaîne précédente / suivante</li>
+          <li><kbd>0</kbd>…<kbd>9</kbd> aller à une chaîne (ex. <kbd>1</kbd> puis <kbd>2</kbd> → CH 12)</li>
+          <li><kbd>M</kbd> couper / remettre le son</li>
+          <li><kbd>F</kbd> ajouter / retirer des favoris</li>
+          <li><kbd>?</kbd> afficher / cacher cette aide</li>
+        </ul>
+        <p className="muted">Si tu as cliqué dans la vidéo, clique à côté pour que la télé reçoive à nouveau les touches.</p>
+      </details>
 
       {!loading && !error && (
         <MovieInfo
