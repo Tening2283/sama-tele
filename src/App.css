@@ -140,3 +140,42 @@ footer .tmdb {
 .yt-host { position: absolute; inset: 0; }
 .no-trailer a { color: var(--accent); }
 .no-trailer { max-width: 90%; white-space: normal; text-align: center; }
+
+/* ---------- Chaîne en cours ---------- */
+.now-playing { text-align: center; margin: 0; color: var(--muted); } /* au-dessus des antennes */
+.now-playing strong { color: var(--text); }
+.now-playing button {
+  margin-left: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer;
+  border: 1px solid #3c3352; background: #221b30; color: var(--accent);
+}
+
+/* ---------- Favoris ---------- */
+.fav-toggle {
+  margin: 4px 0 12px; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: .95rem;
+  border: 1px solid var(--accent); background: transparent; color: var(--accent);
+}
+.fav-toggle.on { background: var(--accent); color: #1b1426; }
+
+.favorites { margin-top: 32px; }
+.favorites h2 { font-size: 1.2rem; }
+.favorites .count { color: var(--muted); font-weight: normal; }
+.favorites ul {
+  list-style: none; margin: 0; padding: 0 0 8px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px;
+}
+.favorites li { position: relative; }
+.fav-play {
+  width: 100%; padding: 0; border: 2px solid transparent; border-radius: 10px; cursor: pointer;
+  background: #221b30; color: var(--text); overflow: hidden; text-align: left;
+}
+.favorites li.current .fav-play { border-color: var(--accent); }
+.fav-play img, .no-poster { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+.no-poster { display: grid; place-items: center; font-size: 2rem; }
+.fav-title {
+  display: block; padding: 6px 8px; font-size: .8rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fav-remove {
+  position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%;
+  border: 0; cursor: pointer; background: rgba(0, 0, 0, .7); color: #fff; font-size: .8rem;
+}

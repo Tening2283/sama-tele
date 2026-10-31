@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Tv from './components/Tv.jsx'
 import MovieInfo from './components/MovieInfo.jsx'
+import Favorites from './components/Favorites.jsx'
+import useFavorites from './useFavorites.js'
 import { COUNTRIES, DECADES, WATCH_REGIONS } from './countries.js'
 import { discoverMovies, getGenres, getProviders, getTrailers, hasKey } from './tmdb.js'
 import './App.css'
@@ -29,6 +31,9 @@ export default function App() {
   const [providers, setProviders] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(hasKey ? '' : 'Ajoute ta clé TMDB dans le fichier .env')
+  const [mode, setMode] = useState('country') // 'country' = films du pays, 'favorites' = mes favoris
+  const [reloadKey, setReloadKey] = useState(0) // +1 pour relancer la recherche du pays
+  const { favorites, isFavorite, toggleFavorite } = useFavorites()
 
   // Évite d'afficher le résultat d'une ancienne requête si on zappe vite.
   const requestId = useRef(0)
@@ -60,6 +65,7 @@ export default function App() {
   // Dès que le pays, le genre ou l'époque change → nouvelle liste de films.
   useEffect(() => {
     if (!country || !hasKey) return
+    setMode('country')
     const id = ++requestId.current
     setLoading(true)
     setError('')
@@ -80,7 +86,23 @@ export default function App() {
         setError(e.message)
         setLoading(false)
       })
-  }, [country, genre, decade, tune])
+  }, [country, genre, decade, reloadKey, tune])
+
+  // Clic sur un favori → la télé passe sur la « chaîne Favoris ».
+  // Les boutons ◀ ▶ zappent alors entre les favoris.
+  const playFavorite = (i) => {
+    setMode('favorites')
+    setMovies(favorites)
+    tune(favorites, i)
+  }
+
+  // Texte « Chaîne : … » affiché au-dessus de la télé.
+  const countryName = COUNTRIES.find((c) => c.code === country)?.name
+  const genreName = genres.find((g) => String(g.id) === genre)?.name
+  const channelName =
+    mode === 'favorites'
+      ? '♥ Mes favoris'
+      : [countryName, genreName, decade && `années ${decade.slice(2)}`].filter(Boolean).join(' · ')
 
   // Stable (useCallback) pour ne pas recréer le lecteur YouTube à chaque rendu.
   const onTrailerFail = useCallback((reason) => setTrailerError(reason), [])
@@ -159,6 +181,15 @@ export default function App() {
         </label>
       </div>
 
+      {movie && (
+        <p className="now-playing">
+          Chaîne : <strong>{channelName}</strong>
+          {mode === 'favorites' && country && (
+            <button onClick={() => setReloadKey((k) => k + 1)}>↩ Revenir à {countryName}</button>
+          )}
+        </p>
+      )}
+
       <Tv
         movie={movie}
         trailerKeys={trailerKeys}
@@ -171,7 +202,22 @@ export default function App() {
         onPrev={() => zap(-1)}
       />
 
-      {!loading && !error && <MovieInfo movie={movie} providers={providers} region={region} />}
+      {!loading && !error && (
+        <MovieInfo
+          movie={movie}
+          providers={providers}
+          region={region}
+          isFavorite={movie ? isFavorite(movie.id) : false}
+          onToggleFavorite={() => toggleFavorite(movie)}
+        />
+      )}
+
+      <Favorites
+        favorites={favorites}
+        currentId={mode === 'favorites' ? movie?.id : null}
+        onPlay={playFavorite}
+        onRemove={toggleFavorite}
+      />
 
       <footer>
         <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer" className="tmdb">

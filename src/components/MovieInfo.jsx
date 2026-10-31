@@ -23,7 +23,7 @@ function dedupe(providers) {
   })
 }
 
-export default function MovieInfo({ movie, providers, region }) {
+export default function MovieInfo({ movie, providers, region, isFavorite, onToggleFavorite }) {
   if (!movie) return null
   const year = movie.release_date?.slice(0, 4)
 
@@ -37,6 +37,9 @@ export default function MovieInfo({ movie, providers, region }) {
           {movie.title} {year && <span className="year">({year})</span>}
         </h2>
         {movie.original_title !== movie.title && <p className="original">{movie.original_title}</p>}
+        <button className={`fav-toggle${isFavorite ? ' on' : ''}`} onClick={onToggleFavorite} aria-pressed={isFavorite}>
+          {isFavorite ? '♥ Dans mes favoris' : '♡ Ajouter aux favoris'}
+        </button>
         {movie.vote_count > 0 && (
           <p className="rating">
             ★ {movie.vote_average.toFixed(1)}/10 · {movie.vote_count} votes
