@@ -1,9 +1,31 @@
 # 📺 Télé Monde
 
+### 👉 [Essayer l'appli : sama-tele.vercel.app](https://sama-tele.vercel.app/)
+
 Une télé rétro : clique sur un pays de la carte, elle zappe sur un film de ce pays et passe sa **bande-annonce officielle**.
 Elle affiche aussi les infos du film et **où le regarder légalement**.
 
-Fonctions : carte du monde avec zoom par continent, filtres genre et époque, favoris, télécommande au clavier.
+![La carte du monde zoomée sur l'Afrique de l'Ouest, le Sénégal choisi, et la télé qui affiche « Le voyage de la Hyène »](docs/capture-accueil.jpg)
+
+## Fonctions
+
+- 🗺️ **Carte du monde cliquable**, avec zoom par continent (dont l'Afrique de l'Ouest)
+- 🎬 **Bande-annonce officielle** lue depuis YouTube ; si elle ne marche pas, la télé essaie la suivante puis affiche l'affiche du film
+- 🎛️ **Filtres** par genre et par époque
+- 📍 **Où regarder le film légalement** selon ton pays (données JustWatch)
+- ♥ **Favoris** gardés dans le navigateur, avec une « chaîne Favoris » pour zapper entre eux
+- ⌨️ **Télécommande au clavier** : ← → pour zapper, chiffres pour aller à une chaîne, M pour le son, F pour les favoris
+- 📱 Fonctionne sur téléphone
+- 🔒 Clé TMDB cachée derrière un serveur : elle n'est jamais envoyée au navigateur
+
+<p>
+  <img src="docs/capture-fiche-favoris.jpg" alt="Fiche du film avec les plateformes légales, et la rangée Mes favoris" width="66%">
+  <img src="docs/capture-mobile.jpg" alt="L'appli sur téléphone" width="30%">
+</p>
+
+## Technologies
+
+React 19 · Vite · API TMDB · API du lecteur YouTube · d3-geo + topojson (carte) · fonction serveur Vercel
 
 ## Lancer le projet sur son ordi
 
