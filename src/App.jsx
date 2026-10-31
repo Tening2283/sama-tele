@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Tv from './components/Tv.jsx'
 import MovieInfo from './components/MovieInfo.jsx'
 import Favorites from './components/Favorites.jsx'
+import WorldMap from './components/WorldMap.jsx'
 import useFavorites from './useFavorites.js'
 import { COUNTRIES, DECADES, WATCH_REGIONS } from './countries.js'
 import { discoverMovies, getGenres, getProviders, getTrailers, hasKey } from './tmdb.js'
@@ -129,8 +130,10 @@ export default function App() {
     <div className="app">
       <header>
         <h1>📺 Télé Monde</h1>
-        <p>Choisis un pays, la télé zappe sur un de ses films.</p>
+        <p>Clique sur un pays de la carte : la télé zappe sur un de ses films.</p>
       </header>
+
+      <WorldMap countries={COUNTRIES} selected={country} onSelect={setCountry} />
 
       <div className="controls">
         <label>
